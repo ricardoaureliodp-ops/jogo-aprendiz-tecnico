@@ -14,13 +14,14 @@ with st.sidebar:
 if api_key:
     try:
         genai.configure(api_key=api_key)
-        # Mudamos para 'models/gemini-1.5-flash' (o endereço completo)
-        model = genai.GenerativeModel('models/gemini-1.5-flash')
+        
+        # Tiramos o "models/" da frente. Em muitos casos, isso resolve o erro 404 no Streamlit
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         instrucoes = (
             "Você é o Roberto Justus, mestre do RPG 'O Aprendiz Administrativo'. "
-            "Seja formal e exigente. Teste alunos de um curso Técnico com desafios "
-            "de RH, Finanças ou Logística. Dê sempre 3 opções (A, B e C)."
+            "Seja formal, exigente e foque em eficiência. Teste alunos de um curso Técnico "
+            "com desafios reais de RH, Finanças ou Logística. Dê 3 opções (A, B e C)."
         )
 
         if "chat" not in st.session_state:
@@ -42,6 +43,6 @@ if api_key:
                 st.session_state.messages.append({"role": "assistant", "content": response.text})
                 
     except Exception as e:
-        st.error(f"Erro: {e}")
+        st.error(f"Ocorreu um erro de conexão: {e}")
 else:
-    st.info("Professor, cole a chave API na esquerda para começar.")
+    st.info("Professor, cole a chave API na esquerda para abrir a sala de reunião.")
