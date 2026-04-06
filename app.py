@@ -8,26 +8,24 @@ st.title("💼 O Aprendiz: Edição Administrativa")
 with st.sidebar:
     st.image("https://upload.wikimedia.org/wikipedia/pt/2/2b/O_Aprendiz_Logo.png", width=150)
     st.write("### Configuração")
-    # O .strip() remove qualquer espaço invisível que entrar sem querer
     api_input = st.text_input("Insira sua Gemini API Key:", type="password")
     api_key = api_input.strip()
 
 if api_key:
     try:
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # Mudamos para 'models/gemini-1.5-flash' (o endereço completo)
+        model = genai.GenerativeModel('models/gemini-1.5-flash')
         
-        # Instruções do Justus enviadas na primeira mensagem (mais estável)
         instrucoes = (
             "Você é o Roberto Justus, mestre do RPG 'O Aprendiz Administrativo'. "
             "Seja formal e exigente. Teste alunos de um curso Técnico com desafios "
-            "de RH, Finanças ou Logística. Dê sempre 3 opções (A, B e C). "
-            "Se o aluno errar 3 vezes, diga: 'VOCÊ ESTÁ DEMITIDO!'."
+            "de RH, Finanças ou Logística. Dê sempre 3 opções (A, B e C)."
         )
 
         if "chat" not in st.session_state:
             st.session_state.chat = model.start_chat(history=[])
-            response = st.session_state.chat.send_message(instrucoes + " Agora se apresente e mande o primeiro desafio.")
+            response = st.session_state.chat.send_message(instrucoes + " Comece se apresentando e mande o 1º desafio.")
             st.session_state.messages = [{"role": "assistant", "content": response.text}]
 
         for message in st.session_state.messages:
@@ -44,6 +42,6 @@ if api_key:
                 st.session_state.messages.append({"role": "assistant", "content": response.text})
                 
     except Exception as e:
-        st.error(f"Erro técnico: {e}")
+        st.error(f"Erro: {e}")
 else:
-    st.info("Professor, cole a chave API na esquerda para abrir a sala de reunião.")
+    st.info("Professor, cole a chave API na esquerda para começar.")
