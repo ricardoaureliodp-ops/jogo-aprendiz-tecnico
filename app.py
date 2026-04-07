@@ -4,7 +4,7 @@ import google.generativeai as genai
 st.set_page_config(page_title="O Aprendiz - Técnico", page_icon="💼")
 st.title("💼 O Aprendiz: Edição Administrativa")
 
-# Puxa a chave do cofre secreto
+# Puxa a chave do cofre secreto do Streamlit
 try:
     api_key = st.secrets["GEMINI_API_KEY"]
 except:
@@ -30,15 +30,25 @@ if api_key:
         genai.configure(api_key=api_key)
         modelos = pegar_modelos(api_key)
         
+        # AQUI ESTÁ A MÁGICA: O jogo já nasce com o modelo forte e que não trava!
+        if "model_name" not in st.session_state:
+            if 'models/gemini-flash-lite-latest' in modelos:
+                st.session_state.model_name = 'models/gemini-flash-lite-latest'
+            elif 'models/gemini-2.0-flash' in modelos:
+                st.session_state.model_name = 'models/gemini-2.0-flash'
+            else:
+                st.session_state.model_name = modelos[0]
+        
         with st.sidebar:
             st.write("---")
             st.caption("🔧 Câmbio de Marcha (Modelos)")
-            # Menu para você trocar o modelo caso o Google travar o atual
-            modelo_escolhido = st.selectbox("Se o Justus travar, troque o cérebro aqui:", modelos)
+            # Menu lateral. Ele já vem no modelo certo definido acima.
+            index_padrao = modelos.index(st.session_state.model_name) if st.session_state.model_name in modelos else 0
+            modelo_escolhido = st.selectbox("Se o Justus travar, troque o cérebro aqui:", modelos, index=index_padrao)
 
         model = genai.GenerativeModel(modelo_escolhido)
         
-        # Inicia o chat ou reinicia se você trocar de modelo
+        # Inicia o chat
         if "chat" not in st.session_state or st.session_state.get("modelo_atual") != modelo_escolhido:
             st.session_state.chat = model.start_chat(history=[])
             st.session_state.modelo_atual = modelo_escolhido
@@ -61,6 +71,6 @@ if api_key:
             
     except Exception as e:
         st.error(f"Atenção: O Google bloqueou este cérebro temporariamente. (Detalhe: {e})")
-        st.warning("👉 DICA DE MESTRE: Vá no menu esquerdo ali na barra e escolha OUTRO modelo (ex: models/gemini-1.5-flash) para continuar a aula na hora!")
+        st.warning("👉 DICA DE MESTRE: Vá no menu esquerdo ali na barra e escolha OUTRO modelo (ex: gemini-2.0-flash) para continuar a aula na hora!")
 else:
     st.info("Aguardando a conexão da sala de reunião...")
