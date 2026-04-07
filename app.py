@@ -4,18 +4,29 @@ import google.generativeai as genai
 st.set_page_config(page_title="O Aprendiz - Técnico", page_icon="💼")
 st.title("💼 O Aprendiz: Edição Administrativa")
 
-with st.sidebar:
-    st.image("https://upload.wikimedia.org/wikipedia/pt/2/2b/O_Aprendiz_Logo.png", width=150)
-    api_key = st.text_input("Insira sua Gemini API Key:", type="password").strip()
+# Tenta pegar a chave do cofre secreto do Streamlit
+try:
+    api_key = st.secrets["GEMINI_API_KEY"]
+except:
+    api_key = None
+
+# Se a chave estiver no cofre, esconde a caixa de senha e mostra uma mensagem de sucesso
+if api_key:
+    with st.sidebar:
+        st.image("https://upload.wikimedia.org/wikipedia/pt/2/2b/O_Aprendiz_Logo.png", width=150)
+        st.success("✅ Sessão conectada com sucesso!")
+else:
+    # Se não achar no cofre (segurança extra), pede na tela
+    with st.sidebar:
+        st.image("https://upload.wikimedia.org/wikipedia/pt/2/2b/O_Aprendiz_Logo.png", width=150)
+        api_key = st.text_input("Insira sua Gemini API Key:", type="password").strip()
 
 if api_key:
     try:
         genai.configure(api_key=api_key)
         
-        # O PULO DO GATO: O código agora procura qual modelo está ativo na sua conta
         if "model_name" not in st.session_state:
             modelos_disponiveis = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
-            # Preferimos o flash, se não tiver, pegamos o primeiro que funcionar
             st.session_state.model_name = 'models/gemini-1.5-flash' if 'models/gemini-1.5-flash' in modelos_disponiveis else modelos_disponiveis[0]
         
         model = genai.GenerativeModel(st.session_state.model_name)
@@ -38,6 +49,5 @@ if api_key:
             
     except Exception as e:
         st.error(f"Erro ao carregar o mestre: {e}")
-        st.info("Dica: Tente atualizar a página (F5) e colar a chave novamente.")
 else:
-    st.info("Aguardando a chave API para abrir a sala de reunião...")
+    st.info("Aguardando a conexão da sala de reunião...")
